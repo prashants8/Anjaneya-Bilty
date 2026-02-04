@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        bilty: {
+          header: "hsl(var(--bilty-header))",
+          "header-text": "hsl(var(--bilty-header-text))",
+          "table-header": "hsl(var(--bilty-table-header))",
+          "table-border": "hsl(var(--bilty-table-border))",
+          highlight: "hsl(var(--bilty-highlight))",
+          section: "hsl(var(--bilty-section))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
