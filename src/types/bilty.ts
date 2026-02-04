@@ -80,10 +80,10 @@ export interface BankDetails {
 }
 
 export const defaultBankDetails: BankDetails = {
-  bankName: "STATE BANK OF INDIA",
-  branchName: "MAIN BRANCH",
-  accountNumber: "1234567890",
-  ifscCode: "SBIN0001234"
+  bankName: "Axis Bank",
+  branchName: "KALOL",
+  accountNumber: "913020041403247",
+  ifscCode: "UTIB0000452"
 };
 
 export const initialBiltyData: BiltyFormData = {
