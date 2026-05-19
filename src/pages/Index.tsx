@@ -8,14 +8,15 @@ import * as supabaseService from '@/lib/supabaseService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Truck, Printer, RotateCcw, FileText, Search, Trash2, Edit, Plus, RefreshCw, FileDown, AlertCircle } from 'lucide-react';
+import { Truck, Printer, RotateCcw, FileText, Search, Trash2, Edit, Plus, RefreshCw, FileDown, AlertCircle, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '../supabaseClient';
 
 const Index = () => {
   const [formData, setFormData] = useState<FreightBillData>(initialBillData);
   const [isExisting, setIsExisting] = useState(false);
   const [bills, setBills] = useState<FreightBillData[]>([]);
+  const [userHandle, setUserHandle] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('form');
   const printRef = useRef<HTMLDivElement>(null);
@@ -33,6 +34,19 @@ const Index = () => {
   useEffect(() => {
     document.documentElement.classList.add('dark');
     fetchBills();
+
+    if (supabase) {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          const email = user.email || '';
+          if (email.endsWith('@arc-bilty.com')) {
+            setUserHandle(email.split('@')[0]);
+          } else {
+            setUserHandle(email);
+          }
+        }
+      });
+    }
   }, []);
 
   const handlePrint = useReactToPrint({
@@ -109,6 +123,17 @@ const Index = () => {
     }
   };
 
+  const handleLogout = async () => {
+    if (supabase) {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error('Logout failed: ' + error.message);
+      } else {
+        toast.success('Logged out successfully!');
+      }
+    }
+  };
+
   const handleDeleteBill = async (billNo: string) => {
     if (window.confirm(`Are you sure you want to delete Bill Number: ${billNo}?`)) {
       try {
@@ -161,6 +186,11 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {userHandle && (
+              <span className="hidden sm:inline-block text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full select-none">
+                👤 {userHandle}
+              </span>
+            )}
             <Button 
               onClick={handleNewBill}
               variant="outline"
@@ -175,6 +205,14 @@ const Index = () => {
             >
               <FileText className="h-4 w-4" />
               {isExisting ? 'Update Bill' : 'Save Bill'}
+            </Button>
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              className="gap-2 text-slate-400 hover:text-rose-500 hover:bg-slate-900 px-3"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden md:inline">Log Out</span>
             </Button>
           </div>
         </div>
