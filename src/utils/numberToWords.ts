@@ -45,7 +45,7 @@ export function numberToWords(amount: string): string {
     const remainder = rupees % 1000;
     
     if (crore) words += convertTwoDigits(crore) + ' Crore ';
-    if (lakh) words += convertTwoDigits(lakh) + ' Lakh ';
+    if (lakh) words += convertTwoDigits(lakh) + ' Lac ';
     if (thousand) words += convertTwoDigits(thousand) + ' Thousand ';
     if (remainder) words += convertThreeDigits(remainder);
     
