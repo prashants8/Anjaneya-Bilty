@@ -157,14 +157,24 @@ const Index = () => {
   };
 
   // Filter list based on search term
-  const filteredBills = bills.filter(b => 
-    b.billNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.entries.some(e => 
-      e.lorryNo.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      e.lrNoDate.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  const filteredBills = bills.filter(b => {
+    if (!b) return false;
+    const billNo = String(b.billNo || '').toLowerCase();
+    const clientName = String(b.clientName || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    
+    const matchesHeader = billNo.includes(query) || clientName.includes(query);
+    
+    const entries = Array.isArray(b.entries) ? b.entries : [];
+    const matchesEntries = entries.some(e => {
+      if (!e) return false;
+      const lorryNo = String(e.lorryNo || '').toLowerCase();
+      const lrNoDate = String(e.lrNoDate || '').toLowerCase();
+      return lorryNo.includes(query) || lrNoDate.includes(query);
+    });
+    
+    return matchesHeader || matchesEntries;
+  });
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
@@ -369,59 +379,67 @@ const Index = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
-                        {filteredBills.map((bill) => (
-                          <tr key={bill.billNo} className="hover:bg-slate-900/40">
-                            <td className="p-4 font-bold text-rose-400 font-mono">{bill.billNo}</td>
-                            <td className="p-4 text-slate-300">
-                              {bill.date ? bill.date.split('-').reverse().join('-') : '—'}
-                            </td>
-                            <td className="p-4 font-semibold">{bill.clientName}</td>
-                            <td className="p-4 text-slate-400">
-                              <div className="max-w-[200px] truncate">
-                                {bill.entries.map(e => e.lrNoDate).filter(Boolean).join(', ') || '—'}
-                              </div>
-                            </td>
-                            <td className="p-4 text-right font-mono font-bold text-emerald-400">
-                              {bill.totalFreight.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="p-4 text-center">
-                              <div className="flex items-center justify-center gap-1.5">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-blue-400 hover:bg-blue-400/10"
-                                  onClick={() => handleLoadBill(bill)}
-                                  title="Edit Bill"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-rose-400 hover:bg-rose-400/10"
-                                  onClick={() => {
-                                    setFormData(bill);
-                                    setIsExisting(true);
-                                    setActiveTab('preview');
-                                    setTimeout(() => handlePrint(), 100);
-                                  }}
-                                  title="Print Bill"
-                                >
-                                  <Printer className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-red-500 hover:bg-red-500/10"
-                                  onClick={() => handleDeleteBill(bill.billNo)}
-                                  title="Delete Bill"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        {filteredBills.map((bill, index) => {
+                          const billNo = bill?.billNo || `temp-${index}`;
+                          const date = bill?.date || '';
+                          const clientName = bill?.clientName || '—';
+                          const entries = Array.isArray(bill?.entries) ? bill.entries : [];
+                          const totalFreight = typeof bill?.totalFreight === 'number' ? bill.totalFreight : 0;
+                          
+                          return (
+                            <tr key={billNo} className="hover:bg-slate-900/40">
+                              <td className="p-4 font-bold text-rose-400 font-mono">{billNo}</td>
+                              <td className="p-4 text-slate-300">
+                                {date ? date.split('-').reverse().join('-') : '—'}
+                              </td>
+                              <td className="p-4 font-semibold">{clientName}</td>
+                              <td className="p-4 text-slate-400">
+                                <div className="max-w-[200px] truncate">
+                                  {entries.map(e => e?.lrNoDate).filter(Boolean).join(', ') || '—'}
+                                </div>
+                              </td>
+                              <td className="p-4 text-right font-mono font-bold text-emerald-400">
+                                {totalFreight.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                              </td>
+                              <td className="p-4 text-center">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-blue-400 hover:bg-blue-400/10"
+                                    onClick={() => handleLoadBill(bill)}
+                                    title="Edit Bill"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-rose-400 hover:bg-rose-400/10"
+                                    onClick={() => {
+                                      setFormData(bill);
+                                      setIsExisting(true);
+                                      setActiveTab('preview');
+                                      setTimeout(() => handlePrint(), 100);
+                                    }}
+                                    title="Print Bill"
+                                  >
+                                    <Printer className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+                                    onClick={() => handleDeleteBill(billNo)}
+                                    title="Delete Bill"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
