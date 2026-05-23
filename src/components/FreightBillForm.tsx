@@ -17,18 +17,20 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
     onChange(updated);
   };
 
+  const calculateTotal = (entries: BillEntry[], insurance: number) => {
+    const entriesSum = entries.reduce((sum, entry) => {
+      const val = parseFloat(entry.freight) || 0;
+      return sum + val;
+    }, 0);
+    return entriesSum + insurance;
+  };
+
   const handleEntryChange = (index: number, field: keyof BillEntry, value: string) => {
     const updatedEntries = [...formData.entries];
     updatedEntries[index] = { ...updatedEntries[index], [field]: value };
 
-    // Recompute total freight if freight column changes
-    let newTotal = formData.totalFreight;
-    if (field === 'freight') {
-      newTotal = updatedEntries.reduce((sum, entry) => {
-        const val = parseFloat(entry.freight) || 0;
-        return sum + val;
-      }, 0);
-    }
+    const insurance = formData.insuranceCharges || 0;
+    const newTotal = calculateTotal(updatedEntries, insurance);
 
     const updated = {
       ...formData,
@@ -39,9 +41,13 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
   };
 
   const addEntryRow = () => {
+    const updatedEntries = [...formData.entries, { ...initialBillEntry }];
+    const insurance = formData.insuranceCharges || 0;
+    const newTotal = calculateTotal(updatedEntries, insurance);
     const updated = {
       ...formData,
-      entries: [...formData.entries, { ...initialBillEntry }],
+      entries: updatedEntries,
+      totalFreight: newTotal,
     };
     onChange(updated);
   };
@@ -49,23 +55,33 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
   const removeEntryRow = (index: number) => {
     if (formData.entries.length <= 1) {
       // Keep at least one row
+      const insurance = formData.insuranceCharges || 0;
       const updated = {
         ...formData,
         entries: [{ ...initialBillEntry }],
-        totalFreight: 0,
+        totalFreight: insurance,
       };
       onChange(updated);
       return;
     }
     const updatedEntries = formData.entries.filter((_, i) => i !== index);
-    const newTotal = updatedEntries.reduce((sum, entry) => {
-      const val = parseFloat(entry.freight) || 0;
-      return sum + val;
-    }, 0);
+    const insurance = formData.insuranceCharges || 0;
+    const newTotal = calculateTotal(updatedEntries, insurance);
 
     const updated = {
       ...formData,
       entries: updatedEntries,
+      totalFreight: newTotal,
+    };
+    onChange(updated);
+  };
+
+  const handleInsuranceChange = (value: string) => {
+    const insurance = parseFloat(value) || 0;
+    const newTotal = calculateTotal(formData.entries, insurance);
+    const updated = {
+      ...formData,
+      insuranceCharges: insurance,
       totalFreight: newTotal,
     };
     onChange(updated);
@@ -259,19 +275,29 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
       {/* Bill Summary */}
       <div className="p-4 bg-muted/40 rounded-lg border border-border">
         <h3 className="font-semibold text-primary mb-3">Freight Bill Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="md:col-span-2">
             <Label className="text-sm font-semibold">Rupees in Words</Label>
             <Textarea
-              className="mt-1 bg-transparent min-h-[60px] resize-none"
+              className="mt-1 bg-transparent min-h-[60px] resize-none text-xs sm:text-sm"
               value={formData.rupeesInWords}
               placeholder="Auto-calculated word form of total..."
               onChange={(e) => handleFieldChange('rupeesInWords', e.target.value)}
             />
           </div>
           <div>
-            <Label className="text-sm font-bold text-lg">TOTAL FREIGHT (Rs.)</Label>
-            <div className="mt-1 text-2xl font-bold font-mono tracking-tight text-emerald-600 bg-background border border-border p-3 rounded-md text-right">
+            <Label className="text-sm font-semibold text-slate-200">Transit Insurance Charges (Rs.)</Label>
+            <Input
+              type="number"
+              className="mt-1 bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+              value={formData.insuranceCharges || ''}
+              placeholder="0.00"
+              onChange={(e) => handleInsuranceChange(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label className="text-sm font-bold text-slate-200">TOTAL FREIGHT (Rs.)</Label>
+            <div className="mt-1 text-xl font-bold font-mono tracking-tight text-emerald-400 bg-slate-900 border border-slate-800 p-2.5 rounded-md text-right h-10 flex items-center justify-end">
               {formData.totalFreight.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>

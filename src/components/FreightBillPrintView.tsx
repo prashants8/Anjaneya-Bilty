@@ -131,6 +131,21 @@ export const FreightBillPrintView = React.forwardRef<HTMLDivElement, FreightBill
                     <td className="p-1.5 text-right font-mono text-xs whitespace-nowrap">{formatFreight(entry.freight)}</td>
                   </tr>
                 ))}
+                {formData.insuranceCharges && formData.insuranceCharges > 0 ? (
+                  <tr className="h-[30px] font-semibold text-[11px]">
+                    <td className="border-r border-black p-1.5"></td>
+                    <td className="border-r border-black p-1.5"></td>
+                    <td className="border-r border-black p-1.5"></td>
+                    <td className="border-r border-black p-1.5"></td>
+                    <td className="border-r border-black p-1.5"></td>
+                    <td className="border-r border-black p-1.5 pl-2 text-left" colSpan={2}>
+                      Transit insurance charges
+                    </td>
+                    <td className="p-1.5 text-right font-mono text-xs whitespace-nowrap">
+                      {formatFreight(formData.insuranceCharges.toString())}
+                    </td>
+                  </tr>
+                ) : null}
                 {/* Single stretching blank row to run vertical lines all the way down to the footer */}
                 <tr className="h-full">
                   <td className="border-r border-black p-1.5"></td>

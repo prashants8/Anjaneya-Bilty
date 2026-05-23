@@ -16,6 +16,7 @@ export interface FreightBillData {
   clientAddress: string;
   entries: BillEntry[];
   totalFreight: number;
+  insuranceCharges: number;
   rupeesInWords: string;
   panNo: string;
   gstId: string;
@@ -54,6 +55,7 @@ export const initialBillData: FreightBillData = {
   clientAddress: '',
   entries: [{ ...initialBillEntry }],
   totalFreight: 0,
+  insuranceCharges: 0,
   rupeesInWords: '',
   panNo: 'FBIPS5544B',
   gstId: '24FBIPS5544B1ZN',
