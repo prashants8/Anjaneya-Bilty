@@ -74,8 +74,8 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
   return (
     <div className="space-y-6">
       {/* Bill Number, Date, PAN, GST, Jurisdiction */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-muted/40 rounded-lg border border-border">
-        <div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-muted/40 rounded-lg border border-border">
+        <div className="col-span-1">
           <Label className="text-sm font-semibold">Bill No.</Label>
           <Input
             className="mt-1"
@@ -84,7 +84,7 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
             onChange={(e) => handleFieldChange('billNo', e.target.value)}
           />
         </div>
-        <div>
+        <div className="col-span-1">
           <Label className="text-sm font-semibold">Bill Date</Label>
           <Input
             type="date"
@@ -93,7 +93,7 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
             onChange={(e) => handleFieldChange('date', e.target.value)}
           />
         </div>
-        <div>
+        <div className="col-span-2 md:col-span-1">
           <Label className="text-sm font-semibold">PAN No.</Label>
           <Input
             className="mt-1"
@@ -101,7 +101,7 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
             onChange={(e) => handleFieldChange('panNo', e.target.value.toUpperCase())}
           />
         </div>
-        <div>
+        <div className="col-span-2 md:col-span-1">
           <Label className="text-sm font-semibold">GST ID No.</Label>
           <Input
             className="mt-1"
@@ -109,7 +109,7 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
             onChange={(e) => handleFieldChange('gstId', e.target.value.toUpperCase())}
           />
         </div>
-        <div>
+        <div className="col-span-2 md:col-span-1">
           <Label className="text-sm font-semibold">Jurisdiction</Label>
           <Input
             className="mt-1"
@@ -146,14 +146,17 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
 
       {/* Consignments / Entries Table */}
       <div className="p-4 bg-card rounded-lg border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-primary">Consignment Entries</h3>
-          <Button onClick={addEntryRow} size="sm" className="gap-1 bg-primary text-primary-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+          <div className="flex flex-col">
+            <h3 className="font-semibold text-primary">Consignment Entries</h3>
+            <span className="text-[10px] text-slate-400 block sm:hidden">← Swipe horizontally to see all columns →</span>
+          </div>
+          <Button onClick={addEntryRow} size="sm" className="gap-1 bg-rose-600 hover:bg-rose-700 text-white w-full sm:w-auto">
             <Plus className="h-4 w-4" /> Add Row
           </Button>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-border rounded-md bg-background">
           <table className="w-full border-collapse border border-border text-sm">
             <thead>
               <tr className="bg-muted">

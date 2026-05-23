@@ -20,7 +20,9 @@ const Index = () => {
   const [userHandle, setUserHandle] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('form');
+  const [scale, setScale] = useState(1);
   const printRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch all bills from Database (Supabase with localStorage fallback)
   const fetchBills = async () => {
@@ -49,6 +51,31 @@ const Index = () => {
       });
     }
   }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const parentWidth = containerRef.current.clientWidth;
+        const targetWidth = 794; 
+        const padding = 16;
+        const availableWidth = parentWidth - padding;
+        if (availableWidth < targetWidth) {
+          setScale(availableWidth / targetWidth);
+        } else {
+          setScale(0.95);
+        }
+      }
+    };
+
+    if (activeTab === 'preview') {
+      const timer = setTimeout(handleResize, 100);
+      window.addEventListener('resize', handleResize);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [activeTab]);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -181,7 +208,7 @@ const Index = () => {
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
       {/* Sleek Dark Header */}
       <header className="bg-slate-950/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 shadow-md">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <div 
               className="flex items-center justify-center rounded-full text-white font-black text-sm w-10 h-10 shrink-0 border border-slate-800 shadow-md select-none"
@@ -190,41 +217,46 @@ const Index = () => {
               ARC
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-wide bg-gradient-to-r from-rose-500 to-rose-300 bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl font-bold tracking-wide bg-gradient-to-r from-rose-500 to-rose-300 bg-clip-text text-transparent leading-tight">
                 ANJANEYA ROAD CARRIERS
               </h1>
-              <p className="text-xs text-slate-400">Freight Billing & Consignment Manager</p>
+              <p className="text-[10px] sm:text-xs text-slate-400">Freight Billing & Consignment Manager</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto border-t border-slate-800/60 sm:border-t-0 pt-2 sm:pt-0">
             {userHandle && (
-              <span className="hidden sm:inline-block text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full select-none">
+              <span className="text-[10px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-full select-none">
                 👤 {userHandle}
               </span>
             )}
-            <Button 
-              onClick={handleNewBill}
-              variant="outline"
-              className="gap-2 border-slate-700 hover:bg-slate-800 text-slate-200"
-            >
-              <Plus className="h-4 w-4" />
-              New Bill
-            </Button>
-            <Button 
-              onClick={handleSaveBill}
-              className="gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold"
-            >
-              <FileText className="h-4 w-4" />
-              {isExisting ? 'Update Bill' : 'Save Bill'}
-            </Button>
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              className="gap-2 text-slate-400 hover:text-rose-500 hover:bg-slate-900 px-3"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden md:inline">Log Out</span>
-            </Button>
+            <div className="flex items-center gap-2 ml-auto sm:ml-0">
+              <Button 
+                onClick={handleNewBill}
+                variant="outline"
+                size="sm"
+                className="gap-1 border-slate-700 hover:bg-slate-800 text-slate-200 text-xs h-8 px-2.5"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                New
+              </Button>
+              <Button 
+                onClick={handleSaveBill}
+                size="sm"
+                className="gap-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs h-8 px-2.5"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                {isExisting ? 'Update' : 'Save'}
+              </Button>
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-slate-400 hover:text-rose-500 hover:bg-slate-900 h-8 px-2"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Log Out</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -290,17 +322,17 @@ const Index = () => {
           {/* Preview Tab */}
           <TabsContent value="preview" className="outline-none flex-1 flex flex-col">
             <Card className="bg-slate-950 border-slate-800 text-slate-100 flex-1 flex flex-col shadow-xl">
-              <CardHeader className="border-b border-slate-800 flex flex-row items-center justify-between py-4">
+              <CardHeader className="border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4">
                 <div>
                   <CardTitle className="text-lg">Invoice Preview</CardTitle>
                   <CardDescription className="text-slate-400">
                     Verify visual alignment before sending to print.
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Button 
                     onClick={() => handlePrint()}
-                    className="gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold"
+                    className="flex-1 sm:flex-none gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs sm:text-sm"
                   >
                     <Printer className="h-4 w-4" />
                     Print Invoice
@@ -326,16 +358,34 @@ const Index = () => {
                       }
                     }}
                     variant="outline"
-                    className="gap-2 border-slate-700 hover:bg-slate-800 text-slate-200"
+                    className="flex-1 sm:flex-none gap-2 border-slate-700 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm"
                   >
                     <FileDown className="h-4 w-4" />
                     Save PDF
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="pt-6 flex-1 overflow-auto bg-slate-900/60 p-6 flex justify-center">
-                <div className="bg-white rounded-lg shadow-2xl p-4 border border-slate-800 scale-95 origin-top">
-                  <FreightBillPrintView ref={printRef} formData={formData} />
+              <CardContent 
+                ref={containerRef}
+                className="pt-6 flex-1 bg-slate-900/60 p-2 sm:p-6 flex justify-center items-start overflow-y-auto min-h-[300px]"
+              >
+                <div 
+                  className="overflow-hidden flex justify-center items-start"
+                  style={{
+                    width: '100%',
+                    height: `${1123 * scale + 32}px`,
+                  }}
+                >
+                  <div 
+                    className="bg-white shadow-2xl origin-top transition-transform duration-200"
+                    style={{
+                      transform: `scale(${scale})`,
+                      width: '210mm',
+                      minHeight: '297mm',
+                    }}
+                  >
+                    <FreightBillPrintView ref={printRef} formData={formData} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -368,18 +418,18 @@ const Index = () => {
                   </div>
                 ) : (
                   <div className="overflow-x-auto rounded-lg border border-slate-800">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-slate-900 text-slate-300 uppercase text-xs">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-900 text-slate-300 uppercase text-[10px] sm:text-xs">
                         <tr>
-                          <th className="p-4 font-bold border-b border-slate-800">Bill No.</th>
-                          <th className="p-4 font-bold border-b border-slate-800">Date</th>
-                          <th className="p-4 font-bold border-b border-slate-800">Client (M/s)</th>
-                          <th className="p-4 font-bold border-b border-slate-800">Lorry Receipts</th>
-                          <th className="p-4 font-bold border-b border-slate-800 text-right">Total Freight (Rs.)</th>
-                          <th className="p-4 font-bold border-b border-slate-800 text-center w-32">Actions</th>
+                          <th className="p-2.5 sm:p-4 font-bold border-b border-slate-800">Bill No.</th>
+                          <th className="p-2.5 sm:p-4 font-bold border-b border-slate-800">Date</th>
+                          <th className="p-2.5 sm:p-4 font-bold border-b border-slate-800">Client (M/s)</th>
+                          <th className="p-2.5 sm:p-4 font-bold border-b border-slate-800">Lorry Receipts</th>
+                          <th className="p-2.5 sm:p-4 font-bold border-b border-slate-800 text-right">Total (Rs.)</th>
+                          <th className="p-2.5 sm:p-4 font-bold border-b border-slate-800 text-center w-24 sm:w-32">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60">
+                      <tbody className="divide-y divide-slate-800/60 text-xs sm:text-sm">
                         {filteredBills.map((bill, index) => {
                           const billNo = bill?.billNo || `temp-${index}`;
                           const date = typeof bill?.date === 'string' ? bill.date : '';
@@ -389,21 +439,21 @@ const Index = () => {
                           
                           return (
                             <tr key={billNo} className="hover:bg-slate-900/40">
-                              <td className="p-4 font-bold text-rose-400 font-mono">{billNo}</td>
-                              <td className="p-4 text-slate-300">
+                              <td className="p-2.5 sm:p-4 font-bold text-rose-400 font-mono">{billNo}</td>
+                              <td className="p-2.5 sm:p-4 text-slate-300">
                                 {date ? date.split('-').reverse().join('-') : '—'}
                               </td>
-                              <td className="p-4 font-semibold">{clientName}</td>
-                              <td className="p-4 text-slate-400">
-                                <div className="max-w-[200px] truncate">
+                              <td className="p-2.5 sm:p-4 font-semibold">{clientName}</td>
+                              <td className="p-2.5 sm:p-4 text-slate-400">
+                                <div className="max-w-[120px] sm:max-w-[200px] truncate">
                                   {entries.map(e => e?.lrNoDate).filter(Boolean).join(', ') || '—'}
                                 </div>
                               </td>
-                              <td className="p-4 text-right font-mono font-bold text-emerald-400">
+                              <td className="p-2.5 sm:p-4 text-right font-mono font-bold text-emerald-400">
                                 {totalFreight.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                               </td>
-                              <td className="p-4 text-center">
-                                <div className="flex items-center justify-center gap-1.5">
+                              <td className="p-2.5 sm:p-4 text-center">
+                                <div className="flex items-center justify-center gap-1">
                                   <Button
                                     variant="ghost"
                                     size="icon"
