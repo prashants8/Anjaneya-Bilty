@@ -21,6 +21,7 @@ export interface FreightBillData {
   panNo: string;
   gstId: string;
   jurisdiction: string;
+  paymentStatus?: 'pending' | 'received';
 }
 
 export interface BankDetails {
@@ -59,5 +60,6 @@ export const initialBillData: FreightBillData = {
   rupeesInWords: '',
   panNo: 'FBIPS5544B',
   gstId: '24FBIPS5544B1ZN',
-  jurisdiction: 'KALOL'
+  jurisdiction: 'KALOL',
+  paymentStatus: 'pending'
 };

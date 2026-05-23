@@ -130,14 +130,19 @@ export async function createFreightBill(bill: FreightBillData) {
   }
 }
 
-export async function updateFreightBill(bill: FreightBillData) {
+export async function updateFreightBill(bill: FreightBillData, originalBillNo: string) {
   // Sync to local fallback
   let bills = getLocalBills();
-  const index = bills.findIndex(b => b.billNo === bill.billNo);
+  const index = bills.findIndex(b => b.billNo === originalBillNo);
   if (index !== -1) {
     bills[index] = bill;
   } else {
-    bills.push(bill);
+    const currIndex = bills.findIndex(b => b.billNo === bill.billNo);
+    if (currIndex !== -1) {
+      bills[currIndex] = bill;
+    } else {
+      bills.push(bill);
+    }
   }
   saveLocalBills(bills);
 
@@ -150,19 +155,35 @@ export async function updateFreightBill(bill: FreightBillData) {
     const { error } = await supabase
       .from(TABLE)
       .update({
+        bill_no: bill.billNo,
         client_name: bill.clientName,
         bill_date: bill.date,
         total_freight: bill.totalFreight,
         data: bill
       })
-      .eq('bill_no', bill.billNo);
+      .eq('bill_no', originalBillNo);
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error(`Bill Number ${bill.billNo} already exists.`);
+      }
+      if (error.code === '42501') {
+        throw new Error(`Supabase RLS Error: Row Level Security blocks updates. Run "ALTER TABLE public.freight_bills DISABLE ROW LEVEL SECURITY;" in your SQL Editor.`);
+      }
+      throw error;
+    }
     return bill;
   } catch (err: any) {
-    console.error('Failed to update in Supabase, synced to localStorage. Error:', err.message);
-    return bill;
+    console.error('Failed to update in Supabase:', err);
+    throw err;
   }
+}
+
+export async function updatePaymentStatus(billNo: string, status: 'pending' | 'received') {
+  const bill = await getFreightBillByNo(billNo);
+  if (!bill) throw new Error('Bill not found');
+  bill.paymentStatus = status;
+  return updateFreightBill(bill, billNo);
 }
 
 export async function deleteFreightBill(billNo: string) {
@@ -182,8 +203,14 @@ export async function deleteFreightBill(billNo: string) {
       .delete()
       .eq('bill_no', billNo);
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42501') {
+        throw new Error(`Supabase RLS Error: Row Level Security blocks deletions. Run "ALTER TABLE public.freight_bills DISABLE ROW LEVEL SECURITY;" in your SQL Editor.`);
+      }
+      throw error;
+    }
   } catch (err: any) {
-    console.error('Failed to delete in Supabase, deleted from localStorage. Error:', err.message);
+    console.error('Failed to delete in Supabase:', err);
+    throw err;
   }
 }

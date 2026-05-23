@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FreightBillData, BillEntry, initialBillEntry } from '@/types/bill';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Lock, Unlock } from 'lucide-react';
 
 interface FreightBillFormProps {
   formData: FreightBillData;
   onChange: (newData: FreightBillData) => void;
+  isExisting?: boolean;
 }
 
-export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onChange }) => {
+export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onChange, isExisting = false }) => {
+  const [isBillNoUnlocked, setIsBillNoUnlocked] = useState(false);
+
   const handleFieldChange = (field: keyof FreightBillData, value: any) => {
     const updated = { ...formData, [field]: value };
     onChange(updated);
@@ -90,13 +93,34 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
   return (
     <div className="space-y-6">
       {/* Bill Number, Date, PAN, GST, Jurisdiction */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-muted/40 rounded-lg border border-border">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 p-4 bg-muted/40 rounded-lg border border-border">
         <div className="col-span-1">
-          <Label className="text-sm font-semibold">Bill No.</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-semibold">Bill No.</Label>
+            {isExisting && (
+              <button
+                type="button"
+                onClick={() => setIsBillNoUnlocked(!isBillNoUnlocked)}
+                className="text-[10px] text-rose-400 hover:text-rose-300 flex items-center gap-0.5 focus:outline-none select-none transition-colors"
+                title={isBillNoUnlocked ? "Lock Bill No." : "Unlock to Edit Bill No."}
+              >
+                {isBillNoUnlocked ? (
+                  <>
+                    <Lock className="h-3 w-3" /> Lock
+                  </>
+                ) : (
+                  <>
+                    <Unlock className="h-3 w-3 text-sky-400" /> Edit
+                  </>
+                )}
+              </button>
+            )}
+          </div>
           <Input
             className="mt-1"
             value={formData.billNo}
             placeholder="e.g. 1082"
+            disabled={isExisting && !isBillNoUnlocked}
             onChange={(e) => handleFieldChange('billNo', e.target.value)}
           />
         </div>
@@ -108,6 +132,17 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
             value={formData.date}
             onChange={(e) => handleFieldChange('date', e.target.value)}
           />
+        </div>
+        <div className="col-span-1">
+          <Label className="text-sm font-semibold">Payment Status</Label>
+          <select
+            className="mt-1 flex h-10 w-full rounded-md border border-slate-800 bg-slate-900 px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-slate-100 font-medium cursor-pointer"
+            value={formData.paymentStatus || 'pending'}
+            onChange={(e) => handleFieldChange('paymentStatus', e.target.value as 'pending' | 'received')}
+          >
+            <option value="pending" className="bg-slate-950 text-amber-400 font-semibold">Pending</option>
+            <option value="received" className="bg-slate-950 text-emerald-400 font-semibold">Received</option>
+          </select>
         </div>
         <div className="col-span-2 md:col-span-1">
           <Label className="text-sm font-semibold">PAN No.</Label>
