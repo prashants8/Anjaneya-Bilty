@@ -8,6 +8,7 @@ import * as supabaseService from '@/lib/supabaseService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { Truck, Printer, RotateCcw, FileText, Search, Trash2, Edit, Plus, RefreshCw, FileDown, AlertCircle, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../supabaseClient';
@@ -381,7 +382,7 @@ const Index = () => {
                       <tbody className="divide-y divide-slate-800/60">
                         {filteredBills.map((bill, index) => {
                           const billNo = bill?.billNo || `temp-${index}`;
-                          const date = bill?.date || '';
+                          const date = typeof bill?.date === 'string' ? bill.date : '';
                           const clientName = bill?.clientName || '—';
                           const entries = Array.isArray(bill?.entries) ? bill.entries : [];
                           const totalFreight = typeof bill?.totalFreight === 'number' ? bill.totalFreight : 0;
