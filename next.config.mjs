@@ -1,3 +1,4 @@
+// Next.js configuration for Anjaneya Bilty.
 import fs from 'fs';
 
 // Monkey patch fs.readlink, fs.readlinkSync, and fs.promises.readlink
