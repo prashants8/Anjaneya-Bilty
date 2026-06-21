@@ -32,7 +32,7 @@ Ensure you have [Node.js](https://nodejs.org/) (v18 or higher recommended) and `
 1. **Clone the repository**:
    ```sh
    git clone <repository-url>
-   cd billty-master
+   cd "Anjaneya - Bilty - App"
    ```
 
 2. **Install dependencies**:
