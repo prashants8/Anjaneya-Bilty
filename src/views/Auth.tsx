@@ -9,8 +9,11 @@ import { Lock, Mail, Phone, Loader2 } from 'lucide-react';
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Auto-formats identifier into a standard email or phone-alias email
@@ -33,9 +36,20 @@ export default function Auth() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier || !password) {
-      toast.error('Please fill in all fields.');
-      return;
+    if (isSignUp) {
+      if (!firstName.trim() || !lastName.trim() || !identifier.trim() || !password || !confirmPassword) {
+        toast.error('Please fill in all fields.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        toast.error('Passwords do not match.');
+        return;
+      }
+    } else {
+      if (!identifier.trim() || !password) {
+        toast.error('Please fill in all fields.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -47,12 +61,27 @@ export default function Auth() {
       const email = getFormattedEmail(identifier);
 
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+              full_name: `${firstName.trim()} ${lastName.trim()}`,
+            }
+          }
         });
         if (error) throw error;
-        toast.success('Account created successfully! You are now logged in.');
+        
+        if (data?.session) {
+          toast.success('Account created successfully! You are now logged in.');
+        } else {
+          toast.success('Registration successful! Please check your email for a confirmation link, then sign in.');
+          setIsSignUp(false); // Redirect to Sign In mode
+          setPassword('');
+          setConfirmPassword('');
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -95,18 +124,51 @@ export default function Auth() {
           </CardTitle>
           <CardDescription className="text-center text-slate-400">
             {isSignUp 
-              ? 'Register with your email or phone number to start billing' 
+              ? 'Register with your email to start billing' 
               : 'Sign in to access your company dashboard'}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleAuth}>
           <CardContent className="space-y-4">
-            {/* Email or Phone Input */}
+            {isSignUp && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Email Address or Phone Input */}
             <div className="space-y-2">
-              <Label htmlFor="identifier">Email Address or Phone Number</Label>
+              <Label htmlFor="identifier">
+                {isSignUp ? 'Email Address' : 'Email Address or Phone Number'}
+              </Label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
-                  {identifier.includes('@') ? (
+                  {isSignUp || identifier.includes('@') ? (
                     <Mail className="h-4 w-4" />
                   ) : (
                     <Phone className="h-4 w-4" />
@@ -114,8 +176,8 @@ export default function Auth() {
                 </span>
                 <Input
                   id="identifier"
-                  type="text"
-                  placeholder="Enter email or 10-digit mobile number"
+                  type={isSignUp ? 'email' : 'text'}
+                  placeholder={isSignUp ? 'name@example.com' : 'Enter email or 10-digit mobile number'}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="pl-10 bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
@@ -144,6 +206,31 @@ export default function Auth() {
                 />
               </div>
             </div>
+
+            {/* Confirm Password Input */}
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <Lock className="h-4 w-4" />
+                  </span>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+                {password && confirmPassword && password !== confirmPassword && (
+                  <p className="text-xs text-rose-500 font-medium mt-1">Passwords do not match.</p>
+                )}
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button 

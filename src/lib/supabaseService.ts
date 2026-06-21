@@ -2,11 +2,23 @@ import { supabase } from '../supabaseClient';
 import { FreightBillData } from '@/types/bill';
 
 const TABLE = 'freight_bills';
-const LOCAL_STORAGE_KEY = 'freight_bills_fallback';
+const LOCAL_STORAGE_KEY_PREFIX = 'freight_bills_';
 
-function getLocalBills(): FreightBillData[] {
+// Helper to get current user ID safely
+async function getCurrentUserId(): Promise<string | undefined> {
+  if (!supabase) return undefined;
   try {
-    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id;
+  } catch (e) {
+    return undefined;
+  }
+}
+
+function getLocalBills(userId?: string): FreightBillData[] {
+  try {
+    const key = userId ? LOCAL_STORAGE_KEY_PREFIX + userId : 'freight_bills_fallback';
+    const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : [];
   } catch (e) {
     console.error('Error reading from localStorage', e);
@@ -14,40 +26,44 @@ function getLocalBills(): FreightBillData[] {
   }
 }
 
-function saveLocalBills(bills: FreightBillData[]) {
+function saveLocalBills(bills: FreightBillData[], userId?: string) {
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(bills));
+    const key = userId ? LOCAL_STORAGE_KEY_PREFIX + userId : 'freight_bills_fallback';
+    localStorage.setItem(key, JSON.stringify(bills));
   } catch (e) {
     console.error('Error saving to localStorage', e);
   }
 }
 
 export async function getFreightBills(): Promise<FreightBillData[]> {
+  const userId = await getCurrentUserId();
   if (!supabase) {
     console.warn('Supabase is not configured, falling back to localStorage');
-    return getLocalBills().sort((a, b) => b.billNo.localeCompare(a.billNo));
+    return getLocalBills(userId).sort((a, b) => b.billNo.localeCompare(a.billNo));
   }
 
   try {
     const { data, error } = await supabase
       .from(TABLE)
       .select('*')
+      .eq('user_id', userId)
       .order('bill_date', { ascending: false });
 
     if (error) {
       console.warn('Table might not exist in Supabase yet, querying localStorage instead:', error.message);
-      return getLocalBills().sort((a, b) => b.billNo.localeCompare(a.billNo));
+      return getLocalBills(userId).sort((a, b) => b.billNo.localeCompare(a.billNo));
     }
     return (data || []).map(row => row.data as FreightBillData);
   } catch (err: any) {
     console.error('Failed to fetch from Supabase, using localStorage:', err);
-    return getLocalBills().sort((a, b) => b.billNo.localeCompare(a.billNo));
+    return getLocalBills(userId).sort((a, b) => b.billNo.localeCompare(a.billNo));
   }
 }
 
 export async function getFreightBillByNo(billNo: string): Promise<FreightBillData | null> {
+  const userId = await getCurrentUserId();
   if (!supabase) {
-    const bills = getLocalBills();
+    const bills = getLocalBills(userId);
     return bills.find(b => b.billNo === billNo) || null;
   }
 
@@ -56,26 +72,28 @@ export async function getFreightBillByNo(billNo: string): Promise<FreightBillDat
       .from(TABLE)
       .select('data')
       .eq('bill_no', billNo)
+      .eq('user_id', userId)
       .maybeSingle();
 
     if (error) throw error;
     return (data?.data as FreightBillData) || null;
   } catch (err) {
     console.error(`Failed to fetch ${billNo} from Supabase, using localStorage:`, err);
-    const bills = getLocalBills();
+    const bills = getLocalBills(userId);
     return bills.find(b => b.billNo === billNo) || null;
   }
 }
 
 export async function createFreightBill(bill: FreightBillData) {
+  const userId = await getCurrentUserId();
   if (!supabase) {
     // Local fallback mode only
-    const bills = getLocalBills();
+    const bills = getLocalBills(userId);
     if (bills.some(b => b.billNo === bill.billNo)) {
       throw new Error(`Bill Number ${bill.billNo} already exists.`);
     }
     bills.push(bill);
-    saveLocalBills(bills);
+    saveLocalBills(bills, userId);
     return bill;
   }
 
@@ -87,6 +105,7 @@ export async function createFreightBill(bill: FreightBillData) {
         client_name: bill.clientName,
         bill_date: bill.date,
         total_freight: bill.totalFreight,
+        user_id: userId,
         data: bill
       }]);
 
@@ -95,7 +114,7 @@ export async function createFreightBill(bill: FreightBillData) {
         throw new Error(`Bill Number ${bill.billNo} already exists.`);
       }
       if (error.code === '42501') {
-        throw new Error(`Supabase RLS Error: Row Level Security is active. Run "ALTER TABLE public.freight_bills DISABLE ROW LEVEL SECURITY;" in your SQL Editor.`);
+        throw new Error(`Supabase RLS Error: Row Level Security is active. Run the SQL script to enable it properly.`);
       }
       if (error.code === '42P01') {
         throw new Error(`Supabase Schema Error: Table "freight_bills" does not exist. Please create it.`);
@@ -104,14 +123,14 @@ export async function createFreightBill(bill: FreightBillData) {
     }
 
     // Sync to local fallback
-    const bills = getLocalBills();
+    const bills = getLocalBills(userId);
     const index = bills.findIndex(b => b.billNo === bill.billNo);
     if (index !== -1) {
       bills[index] = bill;
     } else {
       bills.push(bill);
     }
-    saveLocalBills(bills);
+    saveLocalBills(bills, userId);
 
     return bill;
   } catch (err: any) {
@@ -120,19 +139,20 @@ export async function createFreightBill(bill: FreightBillData) {
       throw err;
     }
     // If it is a network error or fetch failure, fall back to purely local storage
-    const bills = getLocalBills();
+    const bills = getLocalBills(userId);
     if (bills.some(b => b.billNo === bill.billNo)) {
       throw new Error(`Bill Number ${bill.billNo} already exists.`);
     }
     bills.push(bill);
-    saveLocalBills(bills);
+    saveLocalBills(bills, userId);
     return bill;
   }
 }
 
 export async function updateFreightBill(bill: FreightBillData, originalBillNo: string) {
+  const userId = await getCurrentUserId();
   // Sync to local fallback
-  let bills = getLocalBills();
+  let bills = getLocalBills(userId);
   const index = bills.findIndex(b => b.billNo === originalBillNo);
   if (index !== -1) {
     bills[index] = bill;
@@ -144,7 +164,7 @@ export async function updateFreightBill(bill: FreightBillData, originalBillNo: s
       bills.push(bill);
     }
   }
-  saveLocalBills(bills);
+  saveLocalBills(bills, userId);
 
   if (!supabase) {
     console.warn('Supabase is not configured, updated only in localStorage');
@@ -161,14 +181,15 @@ export async function updateFreightBill(bill: FreightBillData, originalBillNo: s
         total_freight: bill.totalFreight,
         data: bill
       })
-      .eq('bill_no', originalBillNo);
+      .eq('bill_no', originalBillNo)
+      .eq('user_id', userId);
 
     if (error) {
       if (error.code === '23505') {
         throw new Error(`Bill Number ${bill.billNo} already exists.`);
       }
       if (error.code === '42501') {
-        throw new Error(`Supabase RLS Error: Row Level Security blocks updates. Run "ALTER TABLE public.freight_bills DISABLE ROW LEVEL SECURITY;" in your SQL Editor.`);
+        throw new Error(`Supabase RLS Error: Row Level Security blocks updates.`);
       }
       throw error;
     }
@@ -187,10 +208,11 @@ export async function updatePaymentStatus(billNo: string, status: 'pending' | 'r
 }
 
 export async function deleteFreightBill(billNo: string) {
+  const userId = await getCurrentUserId();
   // Sync to local fallback
-  let bills = getLocalBills();
+  let bills = getLocalBills(userId);
   bills = bills.filter(b => b.billNo !== billNo);
-  saveLocalBills(bills);
+  saveLocalBills(bills, userId);
 
   if (!supabase) {
     console.warn('Supabase is not configured, deleted only in localStorage');
@@ -201,11 +223,12 @@ export async function deleteFreightBill(billNo: string) {
     const { error } = await supabase
       .from(TABLE)
       .delete()
-      .eq('bill_no', billNo);
+      .eq('bill_no', billNo)
+      .eq('user_id', userId);
 
     if (error) {
       if (error.code === '42501') {
-        throw new Error(`Supabase RLS Error: Row Level Security blocks deletions. Run "ALTER TABLE public.freight_bills DISABLE ROW LEVEL SECURITY;" in your SQL Editor.`);
+        throw new Error(`Supabase RLS Error: Row Level Security blocks deletions.`);
       }
       throw error;
     }
