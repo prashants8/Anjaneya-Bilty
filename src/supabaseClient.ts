@@ -1,14 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL) as string;
-const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY) as string;
+// Safe environment variable retrieval to prevent "process is not defined" in browser
+const getNextPublicUrl = () => {
+  try { return process.env.NEXT_PUBLIC_SUPABASE_URL || ''; } catch { return ''; }
+};
 
-console.log('DEBUG env SUPABASE_URL:', !!supabaseUrl);
-console.log('DEBUG env VITE_SUPABASE_ANON_KEY present:', !!supabaseAnonKey);
+const getNextPublicKey = () => {
+  try { return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''; } catch { return ''; }
+};
 
-// temporarily avoid throwing to see app errors in console
+const getViteUrl = () => {
+  try { return process.env.VITE_SUPABASE_URL || ''; } catch { return ''; }
+};
+
+const getViteKey = () => {
+  try { return process.env.VITE_SUPABASE_ANON_KEY || ''; } catch { return ''; }
+};
+
+const supabaseUrl = getNextPublicUrl() || getViteUrl();
+const supabaseAnonKey = getNextPublicKey() || getViteKey();
+
+console.log('DEBUG env SUPABASE_URL present:', !!supabaseUrl);
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+  console.error('Missing Supabase environment variables. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
 }
 
 export const supabase = (() => {
