@@ -17,6 +17,7 @@ export interface FreightBillData {
   entries: BillEntry[];
   totalFreight: number;
   insuranceCharges: number;
+  advancePayment?: number;
   rupeesInWords: string;
   panNo: string;
   gstId: string;
@@ -57,6 +58,7 @@ export const initialBillData: FreightBillData = {
   entries: [{ ...initialBillEntry }],
   totalFreight: 0,
   insuranceCharges: 0,
+  advancePayment: 0,
   rupeesInWords: '',
   panNo: 'FBIPS5544B',
   gstId: '24FBIPS5544B1ZN',

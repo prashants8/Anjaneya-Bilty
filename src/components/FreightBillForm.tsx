@@ -90,6 +90,15 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
     onChange(updated);
   };
 
+  const handleAdvanceChange = (value: string) => {
+    const advance = parseFloat(value) || 0;
+    const updated = {
+      ...formData,
+      advancePayment: advance,
+    };
+    onChange(updated);
+  };
+
   return (
     <div className="space-y-6">
       {/* Bill Number, Date, PAN, GST, Jurisdiction */}
@@ -310,11 +319,11 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
       {/* Bill Summary */}
       <div className="p-4 bg-muted/40 rounded-lg border border-border">
         <h3 className="font-semibold text-primary mb-3">Freight Bill Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div className="md:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-stretch">
+          <div className="col-span-1 md:col-span-2 md:row-span-2 flex flex-col justify-between">
             <Label className="text-sm font-semibold">Rupees in Words</Label>
             <Textarea
-              className="mt-1 bg-transparent min-h-[60px] resize-none text-xs sm:text-sm"
+              className="mt-1 bg-transparent flex-1 min-h-[80px] resize-none text-xs sm:text-sm"
               value={formData.rupeesInWords}
               placeholder="Auto-calculated word form of total..."
               onChange={(e) => handleFieldChange('rupeesInWords', e.target.value)}
@@ -331,9 +340,25 @@ export const FreightBillForm: React.FC<FreightBillFormProps> = ({ formData, onCh
             />
           </div>
           <div>
+            <Label className="text-sm font-semibold text-slate-200">Advance Payment Received (Rs.)</Label>
+            <Input
+              type="number"
+              className="mt-1 bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+              value={formData.advancePayment || ''}
+              placeholder="0.00"
+              onChange={(e) => handleAdvanceChange(e.target.value)}
+            />
+          </div>
+          <div>
             <Label className="text-sm font-bold text-slate-200">TOTAL FREIGHT (Rs.)</Label>
-            <div className="mt-1 text-xl font-bold font-mono tracking-tight text-emerald-400 bg-slate-900 border border-slate-800 p-2.5 rounded-md text-right h-10 flex items-center justify-end">
+            <div className="mt-1 text-lg font-bold font-mono tracking-tight text-slate-300 bg-slate-900 border border-slate-800 p-2 rounded-md text-right h-10 flex items-center justify-end">
               {formData.totalFreight.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+          </div>
+          <div>
+            <Label className="text-sm font-bold text-slate-200">BALANCE DUE (Rs.)</Label>
+            <div className="mt-1 text-xl font-bold font-mono tracking-tight text-emerald-400 bg-slate-900 border border-slate-800 p-2.5 rounded-md text-right h-10 flex items-center justify-end">
+              {(formData.totalFreight - (formData.advancePayment || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
         </div>

@@ -146,6 +146,49 @@ export const FreightBillPrintView = React.forwardRef<HTMLDivElement, FreightBill
                     </td>
                   </tr>
                 ) : null}
+                {formData.advancePayment && formData.advancePayment > 0 ? (
+                  <>
+                    <tr className="h-[30px] font-semibold text-[11px]">
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5 pl-2 text-left font-bold" colSpan={2}>
+                        Total Freight
+                      </td>
+                      <td className="p-1.5 text-right font-mono text-xs whitespace-nowrap font-bold">
+                        {formatTotalFreight(formData.totalFreight)}
+                      </td>
+                    </tr>
+                    <tr className="h-[30px] font-semibold text-[11px]">
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5 pl-2 text-left text-red-600 font-bold" colSpan={2}>
+                        Less: Advance Received
+                      </td>
+                      <td className="p-1.5 text-right font-mono text-xs whitespace-nowrap text-red-600 font-bold">
+                        -{formatFreight(formData.advancePayment.toString())}
+                      </td>
+                    </tr>
+                    <tr className="h-[30px] font-semibold text-[11px] bg-gray-50/50">
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5"></td>
+                      <td className="border-r border-black p-1.5 pl-2 text-left font-black" colSpan={2}>
+                        Balance Due
+                      </td>
+                      <td className="p-1.5 text-right font-mono text-xs whitespace-nowrap font-black">
+                        {formatTotalFreight(formData.totalFreight - formData.advancePayment)}
+                      </td>
+                    </tr>
+                  </>
+                ) : null}
                 {/* Single stretching blank row to run vertical lines all the way down to the footer */}
                 <tr className="h-full">
                   <td className="border-r border-black p-1.5"></td>
@@ -172,9 +215,11 @@ export const FreightBillPrintView = React.forwardRef<HTMLDivElement, FreightBill
                 </span>
               </div>
               <div className="col-span-1 p-2 flex justify-between items-center bg-gray-50">
-                <span className="font-extrabold uppercase text-[10px]">Total</span>
+                <span className="font-extrabold uppercase text-[10px]">
+                  {formData.advancePayment && formData.advancePayment > 0 ? 'Balance' : 'Total'}
+                </span>
                 <span className="font-black text-[13px] font-mono text-[#d32f2f]">
-                  {formatTotalFreight(formData.totalFreight)}
+                  {formatTotalFreight(formData.totalFreight - (formData.advancePayment || 0))}
                 </span>
               </div>
             </div>

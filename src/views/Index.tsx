@@ -87,12 +87,19 @@ const Index = () => {
   });
 
   const handleFormChange = (newData: FreightBillData) => {
-    // Automatically recalculate words when total freight changes
-    const words = numberToWords(newData.totalFreight.toString());
-    setFormData({
-      ...newData,
-      rupeesInWords: words
-    });
+    const totalChanged = newData.totalFreight !== formData.totalFreight;
+    const advanceChanged = newData.advancePayment !== formData.advancePayment;
+    
+    if (totalChanged || advanceChanged) {
+      const balance = newData.totalFreight - (newData.advancePayment || 0);
+      const words = numberToWords(balance.toString());
+      setFormData({
+        ...newData,
+        rupeesInWords: words
+      });
+    } else {
+      setFormData(newData);
+    }
   };
 
   const handleNewBill = () => {
@@ -209,10 +216,23 @@ const Index = () => {
   const totalFreightAmount = bills.reduce((sum, b) => sum + (b.totalFreight || 0), 0);
   
   const receivedBills = bills.filter(b => b.paymentStatus === 'received');
-  const totalReceivedAmount = receivedBills.reduce((sum, b) => sum + (b.totalFreight || 0), 0);
-  
   const pendingBills = bills.filter(b => !b.paymentStatus || b.paymentStatus === 'pending');
-  const totalPendingAmount = pendingBills.reduce((sum, b) => sum + (b.totalFreight || 0), 0);
+
+  const totalReceivedAmount = bills.reduce((sum, b) => {
+    if (b.paymentStatus === 'received') {
+      return sum + (b.totalFreight || 0);
+    } else {
+      return sum + (b.advancePayment || 0);
+    }
+  }, 0);
+
+  const totalPendingAmount = bills.reduce((sum, b) => {
+    if (b.paymentStatus === 'received') {
+      return sum;
+    } else {
+      return sum + ((b.totalFreight || 0) - (b.advancePayment || 0));
+    }
+  }, 0);
 
   const receivedPercent = totalFreightAmount > 0 
     ? Math.round((totalReceivedAmount / totalFreightAmount) * 100) 
@@ -459,9 +479,16 @@ const Index = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
-                            <span className="font-mono font-bold text-slate-200 text-xs sm:text-sm">
-                              ₹{bill.totalFreight.toLocaleString('en-IN')}
-                            </span>
+                            <div className="flex flex-col items-end">
+                              <span className="font-mono font-bold text-slate-200 text-xs sm:text-sm">
+                                ₹{(bill.totalFreight - (bill.advancePayment || 0)).toLocaleString('en-IN')}
+                              </span>
+                              {bill.advancePayment ? bill.advancePayment > 0 && (
+                                <span className="text-[9px] text-slate-400">
+                                  Adv: ₹{bill.advancePayment.toLocaleString('en-IN')}
+                                </span>
+                              ) : null}
+                            </div>
                             <Button
                               size="sm"
                               className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10px] sm:text-xs h-7 px-2.5 rounded flex items-center gap-1"
@@ -648,8 +675,15 @@ const Index = () => {
                                   {entries.map(e => e?.lrNoDate).filter(Boolean).join(', ') || '—'}
                                 </div>
                               </td>
-                              <td className="p-2.5 sm:p-4 text-right font-mono font-bold text-emerald-400">
-                                {totalFreight.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                              <td className="p-2.5 sm:p-4 text-right font-mono">
+                                <div className="font-bold text-emerald-400">
+                                  ₹{totalFreight.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                </div>
+                                {bill.advancePayment ? bill.advancePayment > 0 && (
+                                  <div className="text-[10px] text-slate-400">
+                                    Bal: ₹{(totalFreight - bill.advancePayment).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                  </div>
+                                ) : null}
                               </td>
                               <td className="p-2.5 sm:p-4 text-center">
                                 <button
