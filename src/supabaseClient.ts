@@ -17,8 +17,13 @@ const getViteKey = () => {
   try { return process.env.VITE_SUPABASE_ANON_KEY || ''; } catch { return ''; }
 };
 
-const supabaseUrl = getNextPublicUrl() || getViteUrl();
-const supabaseAnonKey = getNextPublicKey() || getViteKey();
+// Hardcoded fallback for public Supabase keys to make sure the app works
+// in both local, web deployments, and mobile builds without requiring env configuration.
+const FALLBACK_URL = 'https://ypxumqrvhjscrylzmjsz.supabase.co';
+const FALLBACK_KEY = 'sb_publishable_fduPXvncuLlzKmLpxCe9QQ_TwVb-h7A';
+
+const supabaseUrl = getNextPublicUrl() || getViteUrl() || FALLBACK_URL;
+const supabaseAnonKey = getNextPublicKey() || getViteKey() || FALLBACK_KEY;
 
 console.log('DEBUG env SUPABASE_URL present:', !!supabaseUrl);
 
