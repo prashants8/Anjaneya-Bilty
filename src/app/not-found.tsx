@@ -9,11 +9,11 @@ export default function NotFound() {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900 text-slate-100 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--surface)] text-[var(--ink)] p-4">
       <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold text-rose-500">404</h1>
-        <p className="mb-4 text-xl text-slate-400">Oops! Page not found</p>
-        <Link href="/" className="text-rose-400 underline hover:text-rose-300">
+        <h1 className="mb-4 text-4xl font-bold text-[var(--arc-red)]">404</h1>
+        <p className="mb-4 text-xl text-[var(--muted)]">Oops! Page not found</p>
+        <Link href="/" className="text-[var(--secondary)] underline hover:opacity-80">
           Return to Home
         </Link>
       </div>

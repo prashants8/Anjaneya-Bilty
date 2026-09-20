@@ -38,13 +38,13 @@ export const FreightBillPrintView = React.forwardRef<HTMLDivElement, FreightBill
               {/* Logo & Slogan */}
               <div className="flex items-center gap-4">
                 <div 
-                  className="flex items-center justify-center rounded-full bg-[#c21820] text-white font-bold text-2xl w-14 h-14 shrink-0 border border-black shadow-sm"
-                  style={{ backgroundColor: '#d32f2f' }}
+                  className="flex items-center justify-center rounded-full text-white font-bold text-2xl w-14 h-14 shrink-0 border border-black shadow-sm"
+                  style={{ backgroundColor: '#E11D3C' }}
                 >
                   ARC
                 </div>
                 <div>
-                  <h1 className="text-3xl font-extrabold tracking-tight text-[#d32f2f] uppercase m-0 leading-none">
+                  <h1 className="text-3xl font-extrabold tracking-tight text-[#E11D3C] uppercase m-0 leading-none">
                     Anjaneya Road Carriers
                   </h1>
                   <p className="text-[10px] font-semibold text-gray-700 italic mt-1 leading-none">
@@ -97,7 +97,7 @@ export const FreightBillPrintView = React.forwardRef<HTMLDivElement, FreightBill
 
             {/* Sub-header Title */}
             <div className="text-center bg-gray-50 border-b border-black py-1.5">
-              <h2 className="text-sm font-black tracking-widest text-[#d32f2f] uppercase m-0">
+              <h2 className="text-sm font-black tracking-widest text-[#A8112A] uppercase m-0">
                 Freight Bill
               </h2>
             </div>
@@ -218,7 +218,7 @@ export const FreightBillPrintView = React.forwardRef<HTMLDivElement, FreightBill
                 <span className="font-extrabold uppercase text-[10px]">
                   {formData.advancePayment && formData.advancePayment > 0 ? 'Balance' : 'Total'}
                 </span>
-                <span className="font-black text-[13px] font-mono text-[#d32f2f]">
+                <span className="font-black text-[13px] font-mono text-[#E11D3C]">
                   {formatTotalFreight(formData.totalFreight - (formData.advancePayment || 0))}
                 </span>
               </div>
@@ -243,7 +243,7 @@ export const FreightBillPrintView = React.forwardRef<HTMLDivElement, FreightBill
                 <div className="mt-1">Checked by</div>
               </div>
               <div className="text-center flex flex-col items-center">
-                <div className="text-[9px] uppercase tracking-wider mb-8 text-[#d32f2f]">
+                <div className="text-[9px] uppercase tracking-wider mb-8 text-[#E11D3C]">
                   For, ANJANEYA ROAD CARRIERS
                 </div>
                 <div className="w-40 border-t border-black/40"></div>

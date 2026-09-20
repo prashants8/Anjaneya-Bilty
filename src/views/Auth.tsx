@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Lock, Mail, Phone, Loader2 } from 'lucide-react';
+import { Lock, Mail, Phone, Loader2, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 export default function Auth() {
+  const { theme, setTheme } = useTheme();
   const [isSignUp, setIsSignUp] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -99,30 +101,54 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--surface)] text-[var(--ink)] flex flex-col items-center justify-center p-4 relative transition-colors duration-200">
+      {/* Theme Toggle Button */}
+      <div className="absolute top-4 right-4">
+        <Button
+          type="button"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          variant="outline"
+          size="sm"
+          className="gap-1.5 border-[var(--line)] hover:bg-[var(--card)] text-[var(--ink)] text-xs h-8 px-2.5 shadow-sm"
+          title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+        >
+          {theme === 'dark' ? (
+            <>
+              <Sun className="h-3.5 w-3.5 text-[var(--warning)]" />
+              <span className="text-xs font-semibold">Light</span>
+            </>
+          ) : (
+            <>
+              <Moon className="h-3.5 w-3.5 text-[var(--secondary)]" />
+              <span className="text-xs font-semibold">Dark</span>
+            </>
+          )}
+        </Button>
+      </div>
+
       {/* Branding Header */}
       <div className="flex flex-col items-center gap-3 mb-8 select-none">
         <div 
-          className="flex items-center justify-center rounded-full text-white font-black text-2xl w-16 h-16 border-2 border-slate-700 shadow-xl"
-          style={{ backgroundColor: '#d32f2f' }}
+          className="flex items-center justify-center rounded-full text-white font-black text-2xl w-16 h-16 border-2 border-[var(--line)] shadow-xl"
+          style={{ backgroundColor: '#E11D3C' }}
         >
           ARC
         </div>
         <div className="text-center">
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-wide bg-gradient-to-r from-rose-500 to-rose-300 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-wide text-[#E11D3C]">
             ANJANEYA ROAD CARRIERS
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Freight Billing & Consignment Manager</p>
+          <p className="text-sm text-[var(--muted)] mt-1">Freight Billing & Consignment Manager</p>
         </div>
       </div>
 
       {/* Auth Card */}
-      <Card className="w-full max-w-md bg-slate-950 border-slate-800 text-slate-100 shadow-2xl">
+      <Card className="w-full max-w-md bg-[var(--card)] border-[var(--line)] text-[var(--ink)] shadow-2xl">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center font-bold">
+          <CardTitle className="text-2xl text-center font-bold text-[var(--ink)]">
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </CardTitle>
-          <CardDescription className="text-center text-slate-400">
+          <CardDescription className="text-center text-[var(--muted)]">
             {isSignUp 
               ? 'Register with your email to start billing' 
               : 'Sign in to access your company dashboard'}
@@ -133,27 +159,27 @@ export default function Auth() {
             {isSignUp && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName" className="text-[var(--ink)]">First Name</Label>
                   <Input
                     id="firstName"
                     type="text"
                     placeholder="John"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                    className="bg-[var(--surface)] border-[var(--line)] text-[var(--ink)] placeholder:text-[var(--muted)] focus-visible:ring-[var(--secondary)]"
                     disabled={loading}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName" className="text-[var(--ink)]">Last Name</Label>
                   <Input
                     id="lastName"
                     type="text"
                     placeholder="Doe"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                    className="bg-[var(--surface)] border-[var(--line)] text-[var(--ink)] placeholder:text-[var(--muted)] focus-visible:ring-[var(--secondary)]"
                     disabled={loading}
                     required
                   />
@@ -163,11 +189,11 @@ export default function Auth() {
 
             {/* Email Address or Phone Input */}
             <div className="space-y-2">
-              <Label htmlFor="identifier">
+              <Label htmlFor="identifier" className="text-[var(--ink)]">
                 {isSignUp ? 'Email Address' : 'Email Address or Phone Number'}
               </Label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[var(--muted)]">
                   {isSignUp || identifier.includes('@') ? (
                     <Mail className="h-4 w-4" />
                   ) : (
@@ -180,7 +206,7 @@ export default function Auth() {
                   placeholder={isSignUp ? 'name@example.com' : 'Enter email or 10-digit mobile number'}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="pl-10 bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                  className="pl-10 bg-[var(--surface)] border-[var(--line)] text-[var(--ink)] placeholder:text-[var(--muted)] focus-visible:ring-[var(--secondary)]"
                   disabled={loading}
                   required
                 />
@@ -189,9 +215,9 @@ export default function Auth() {
 
             {/* Password Input */}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-[var(--ink)]">Password</Label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[var(--muted)]">
                   <Lock className="h-4 w-4" />
                 </span>
                 <Input
@@ -200,7 +226,7 @@ export default function Auth() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                  className="pl-10 bg-[var(--surface)] border-[var(--line)] text-[var(--ink)] placeholder:text-[var(--muted)] focus-visible:ring-[var(--secondary)]"
                   disabled={loading}
                   required
                 />
@@ -210,9 +236,9 @@ export default function Auth() {
             {/* Confirm Password Input */}
             {isSignUp && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-[var(--ink)]">Confirm Password</Label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[var(--muted)]">
                     <Lock className="h-4 w-4" />
                   </span>
                   <Input
@@ -221,13 +247,13 @@ export default function Auth() {
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10 bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus-visible:ring-rose-600"
+                    className="pl-10 bg-[var(--surface)] border-[var(--line)] text-[var(--ink)] placeholder:text-[var(--muted)] focus-visible:ring-[var(--secondary)]"
                     disabled={loading}
                     required
                   />
                 </div>
                 {password && confirmPassword && password !== confirmPassword && (
-                  <p className="text-xs text-rose-500 font-medium mt-1">Passwords do not match.</p>
+                  <p className="text-xs text-[var(--arc-red)] font-medium mt-1">Passwords do not match.</p>
                 )}
               </div>
             )}
@@ -235,21 +261,42 @@ export default function Auth() {
           <CardFooter className="flex flex-col space-y-4">
             <Button 
               type="submit" 
-              className="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold flex items-center justify-center gap-2"
+              className="w-full bg-[var(--arc-red)] hover:bg-[var(--arc-red-hover)] text-white font-semibold flex items-center justify-center gap-2"
               disabled={loading}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {isSignUp ? 'Register' : 'Sign In'}
             </Button>
 
-            <div className="text-sm text-center text-slate-400">
+            <div className="relative w-full my-1">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-[var(--line)]" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase">
+                <span className="bg-[var(--card)] px-2 text-[var(--muted)] font-semibold">Or</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                localStorage.setItem('arc_guest_mode', 'true');
+                window.location.reload();
+              }}
+              className="w-full border-[var(--line)] hover:bg-[var(--surface)] text-[var(--ink)] font-medium text-xs h-9"
+            >
+              Continue in Offline / Demo Mode
+            </Button>
+
+            <div className="text-sm text-center text-[var(--muted)]">
               {isSignUp ? (
                 <>
                   Already have an account?{' '}
                   <button
                     type="button"
                     onClick={() => setIsSignUp(false)}
-                    className="text-rose-500 hover:underline hover:text-rose-400 font-medium"
+                    className="text-[var(--secondary)] hover:underline font-medium"
                     disabled={loading}
                   >
                     Sign In
@@ -261,7 +308,7 @@ export default function Auth() {
                   <button
                     type="button"
                     onClick={() => setIsSignUp(true)}
-                    className="text-rose-500 hover:underline hover:text-rose-400 font-medium"
+                    className="text-[var(--secondary)] hover:underline font-medium"
                     disabled={loading}
                   >
                     Create Account

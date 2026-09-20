@@ -10,8 +10,13 @@ import { Loader2 } from "lucide-react";
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('arc_guest_mode') === 'true') {
+      setIsGuest(true);
+    }
+
     if (!supabase) {
       setLoading(false);
       return;
@@ -34,11 +39,11 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600" />
+      <div className="min-h-screen bg-[var(--surface)] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--secondary)]" />
       </div>
     );
   }
 
-  return session ? <Index /> : <Auth />;
+  return (session || isGuest) ? <Index /> : <Auth />;
 }
