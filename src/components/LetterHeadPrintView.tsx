@@ -46,103 +46,71 @@ export const LetterHeadPrintView = React.forwardRef<HTMLDivElement, LetterHeadPr
               fontFamily: "'Noto Sans', Arial, Helvetica, sans-serif",
             }}>
 
-              {/* Row 1: ARC Circle Logo + Company Name & Fleet Owner Box */}
-              {/* Row 1: ARC Circle Logo + Company Name & Fleet Owner Box */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+              {/* Row 1: Table-based layout — renders correctly in html2canvas/html2pdf */}
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                tableLayout: 'auto',
               }}>
+                <tbody>
+                  <tr>
+                    {/* ARC Circle Logo cell */}
+                    <td style={{ verticalAlign: 'middle', width: '88px', paddingRight: '14px' }}>
+                      <div style={{
+                        width: '74px',
+                        height: '74px',
+                        borderRadius: '50%',
+                        backgroundColor: '#a81b1b',
+                        color: '#ffffff',
+                        textAlign: 'center',
+                        lineHeight: '74px',
+                        fontWeight: 900,
+                        fontSize: '22px',
+                        letterSpacing: '2px',
+                      }}>
+                        ARC
+                      </div>
+                    </td>
 
-                {/* ARC Circle Logo */}
-                <div style={{
-                  width: '74px',
-                  height: '74px',
-                  borderRadius: '50%',
-                  backgroundColor: '#a81b1b',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 900,
-                  fontSize: '22px',
-                  letterSpacing: '2px',
-                  flexShrink: 0,
-                  marginRight: '14px',
-                }}>
-                  ARC
-                </div>
+                    {/* Company name + Fleet Owner box cell */}
+                    <td style={{ verticalAlign: 'middle' }}>
+                      {/* Company Name */}
+                      <div style={{
+                        color: '#a81b1b',
+                        fontSize: '34px',
+                        fontWeight: 900,
+                        fontStyle: 'italic',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.025em',
+                        lineHeight: 1.05,
+                        whiteSpace: 'nowrap',
+                        fontFamily: "'Noto Sans', Arial, Helvetica, sans-serif",
+                        margin: 0,
+                        padding: 0,
+                      }}>
+                        ANJANEYA ROAD CARRIERS
+                      </div>
 
-                {/* Right side: Company Name + Fleet Owner Box */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}>
-
-                  {/* Company Name: ANJANEYA ROAD CARRIERS (Bold, Italic, Crimson Red) */}
-                  <div style={{
-                    display: 'flex',
-                    margin: 0,
-                    padding: 0,
-                    color: '#a81b1b',
-                    fontSize: '34px',
-                    fontWeight: 900,
-                    fontStyle: 'italic',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.025em',
-                    lineHeight: 1.05,
-                    whiteSpace: 'nowrap',
-                    fontFamily: "'Noto Sans', Arial, Helvetica, sans-serif",
-                  }}>
-                    <span>A</span>
-                    <span>NJANEYA ROAD CARRIERS</span>
-                  </div>
-
-                  {/* Fleet Owner Box: Starts exactly under 'N' in ANJANEYA, ends at right edge of CARRIERS */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginTop: '3px',
-                    width: '100%',
-                  }}>
-                    {/* Invisible spacer matching the exact width of letter 'A' */}
-                    <span style={{
-                      color: 'transparent',
-                      fontSize: '34px',
-                      fontWeight: 900,
-                      fontStyle: 'italic',
-                      letterSpacing: '0.025em',
-                      lineHeight: 1.05,
-                      userSelect: 'none',
-                      fontFamily: "'Noto Sans', Arial, Helvetica, sans-serif",
-                    }}>
-                      A
-                    </span>
-
-                    {/* Tight-fit height blue rectangle box */}
-                    <div style={{
-                      flex: 1,
-                      border: '2px solid #15438c',
-                      color: '#15438c',
-                      fontWeight: 700,
-                      fontSize: '14.5px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      textAlign: 'center',
-                      padding: '2px 8px',
-                      boxSizing: 'border-box',
-                      whiteSpace: 'nowrap',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontFamily: "'Noto Sans', Arial, Helvetica, sans-serif",
-                    }}>
-                      FLEET OWNER - TRANSPORT CONTRACTOR
-                    </div>
-                  </div>
-
-                </div>
-              </div>
+                      {/* Fleet Owner Box — full width of the company name cell */}
+                      <div style={{
+                        marginTop: '4px',
+                        border: '2px solid #15438c',
+                        color: '#15438c',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        textAlign: 'center',
+                        padding: '2px 8px',
+                        boxSizing: 'border-box',
+                        fontFamily: "'Noto Sans', Arial, Helvetica, sans-serif",
+                      }}>
+                        FLEET OWNER - TRANSPORT CONTRACTOR
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
               {/* Row 2: Office Address — Centered Blue Text */}
               <div style={{
