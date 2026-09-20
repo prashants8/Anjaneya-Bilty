@@ -136,25 +136,60 @@ const Index = () => {
     }
   });
 
-  const handleExportLetterPdf = async () => {
+  const handleExportLetterPdf = () => {
     if (!letterPrintRef.current) { toast.error('Nothing to export'); return; }
-    try {
-      const element = letterPrintRef.current;
-      const opt = {
-        margin: 0,
-        filename: `Letter-${letterData.recipientName || 'ARC'}-${letterData.date}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-      const mod = (await import('html2pdf.js')) as any;
-      const html2pdfFactory = mod.default || mod;
-      await html2pdfFactory().set(opt).from(element).save();
-      toast.success('Letter PDF saved successfully!');
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save PDF');
+
+    const filename = `Letter-${letterData.recipientName || 'ARC'}-${letterData.date}`;
+    const contentHtml = letterPrintRef.current.outerHTML;
+
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) {
+      toast.error('Popup blocked. Please allow popups for this site and try again.');
+      return;
     }
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${filename}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;900&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fff; }
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    @media print {
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  ${contentHtml}
+  <script>
+    // Wait for fonts to load then print
+    document.fonts.ready.then(function() {
+      setTimeout(function() {
+        window.print();
+        setTimeout(function() { window.close(); }, 500);
+      }, 300);
+    });
+  </script>
+</body>
+</html>`);
+    printWindow.document.close();
+    toast.success('Print dialog opened — choose "Save as PDF" to download.');
   };
+
+
 
   const handleSaveLetter = async () => {
     if (!letterData.recipientName && !letterData.content) {
