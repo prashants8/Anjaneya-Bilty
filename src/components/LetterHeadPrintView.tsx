@@ -47,11 +47,11 @@ export const LetterHeadPrintView = React.forwardRef<HTMLDivElement, LetterHeadPr
             }}>
 
               {/* Row 1: ARC Circle Logo + Company Name & Fleet Owner Box */}
+              {/* Row 1: ARC Circle Logo + Company Name & Fleet Owner Box */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '14px',
               }}>
 
                 {/* ARC Circle Logo */}
@@ -68,13 +68,14 @@ export const LetterHeadPrintView = React.forwardRef<HTMLDivElement, LetterHeadPr
                   fontSize: '22px',
                   letterSpacing: '2px',
                   flexShrink: 0,
+                  marginRight: '14px',
                 }}>
                   ARC
                 </div>
 
                 {/* Right side: Company Name + Fleet Owner Box */}
                 <div style={{
-                  display: 'inline-flex',
+                  display: 'flex',
                   flexDirection: 'column',
                 }}>
 
@@ -102,10 +103,11 @@ export const LetterHeadPrintView = React.forwardRef<HTMLDivElement, LetterHeadPr
                     display: 'flex',
                     alignItems: 'center',
                     marginTop: '3px',
+                    width: '100%',
                   }}>
                     {/* Invisible spacer matching the exact width of letter 'A' */}
                     <span style={{
-                      visibility: 'hidden',
+                      color: 'transparent',
                       fontSize: '34px',
                       fontWeight: 900,
                       fontStyle: 'italic',
